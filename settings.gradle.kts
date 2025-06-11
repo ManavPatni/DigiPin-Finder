@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DigiPin Scanner"
+rootProject.name = "DigiPin Finder"
 include(":app")

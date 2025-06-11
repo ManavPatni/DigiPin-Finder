@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">DigiPin Scanner</string>
+    <string name="app_name">DigiPin Finder</string>
+    <string name="marked_digipin">Marked DIGIPIN</string>
 </resources>
