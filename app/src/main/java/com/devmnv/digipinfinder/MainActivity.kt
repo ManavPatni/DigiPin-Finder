@@ -25,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.devmnv.digipinfinder.model.BottomNavigationItem
 import com.devmnv.digipinfinder.ui.screens.Favorites
 import com.devmnv.digipinfinder.ui.screens.Find
@@ -56,7 +55,6 @@ class MainActivity : ComponentActivity() {
                         unselectedIcon = Icons.Outlined.FavoriteBorder
                     )
                 )
-
                 var selectedItemIndex by rememberSaveable {
                     mutableStateOf(0)
                 }

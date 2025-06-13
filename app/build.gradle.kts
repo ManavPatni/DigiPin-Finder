@@ -67,4 +67,6 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.maps.compose.utils)
     implementation(libs.maps.compose.widgets)
+    implementation(libs.places)
+    implementation(libs.play.services.maps)
 }

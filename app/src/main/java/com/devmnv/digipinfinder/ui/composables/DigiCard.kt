@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -28,10 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
-import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun Card(
+fun DigiCard(
     digiPin: String,
     latLng: String,
     isFavorite: Boolean,
@@ -133,7 +131,7 @@ fun Card(
 @Preview
 @Composable
 private fun CardPreview() {
-    Card(
+    DigiCard(
         digiPin = "4J6-M8K-2T22",
         latLng = "16.68149965, 74.43999052",
         isFavorite = false,
