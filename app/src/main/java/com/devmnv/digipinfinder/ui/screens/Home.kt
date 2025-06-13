@@ -2,6 +2,7 @@ package com.devmnv.digipinfinder.ui.screens
 
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -150,8 +151,16 @@ fun Home(modifier: Modifier = Modifier) {
             }
         }
 
-        if (showCard && markerPosition != null) {
-            val digipin = Digipin.getDigiPin(lat = markerPosition!!.latitude, lon = markerPosition!!.longitude)
+        val digipin = try {
+            markerPosition?.let { pos ->
+                Digipin.getDigiPin(lat = pos.latitude, lon = pos.longitude)
+            }
+        } catch (e: IllegalArgumentException) {
+            Toast.makeText(context, "DIGIPIN not available for this location", Toast.LENGTH_SHORT).show()
+            null
+        }
+
+        if (showCard && markerPosition != null && digipin != null) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
