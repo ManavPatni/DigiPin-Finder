@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.composables.DigiCard
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
+import com.devmnv.digipinfinder.utils.Digipin
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -150,13 +151,14 @@ fun Home(modifier: Modifier = Modifier) {
         }
 
         if (showCard && markerPosition != null) {
+            val digipin = Digipin.getDigiPin(lat = markerPosition!!.latitude, lon = markerPosition!!.longitude)
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(vertical = 10.dp)
             ) {
                 DigiCard(
-                    digiPin = "DGPX2406",
+                    digiPin = digipin,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
                     isFavorite = false,
                     onDismiss = {
