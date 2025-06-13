@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,16 +28,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
+import com.google.android.gms.maps.model.LatLng
 
-@Preview
 @Composable
-fun Card() {
+fun Card(
+    digiPin: String,
+    latLng: String,
+    isFavorite: Boolean,
+    onDismiss: () -> Unit
+) {
     Box(
         modifier = Modifier
             .padding(horizontal = 10.dp)
             .fillMaxWidth()
             .background(Color.White, shape = RoundedCornerShape(8.dp)),
     ) {
+        IconButton(
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick = { onDismiss() }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Dismiss"
+            )
+        }
         Column(
             modifier = Modifier
                 .padding(all = 8.dp),
@@ -47,11 +65,11 @@ fun Card() {
                 fontSize = 14.sp,
                 color = Color(0xFF0D141C)
             )
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "4J6-M8K-2T22",
+                    text = digiPin,
                     fontFamily = SpaceGroteskFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp,
@@ -60,7 +78,7 @@ fun Card() {
                         .padding(vertical = 4.dp)
                 )
                 IconButton(
-                    onClick = {/*TODO*/}
+                    onClick = {/*TODO*/ }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_copy),
@@ -69,12 +87,56 @@ fun Card() {
                 }
             }
             Text(
-                text = "16.68149965, 74.43999052",
+                text = latLng,
                 fontFamily = SpaceGroteskFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
                 color = Color(0xFF4A739C),
             )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ActionButton(
+                    drawableRes = R.drawable.ic_favorite,
+                    text = "Favorite",
+                    onClick = {/*Todo*/ }
+                )
+                ActionButton(
+                    drawableRes = R.drawable.ic_share,
+                    text = "Share",
+                    onClick = {/*Todo*/ }
+                )
+                ActionButton(
+                    drawableRes = R.drawable.ic_download,
+                    text = "Share",
+                    onClick = {/*Todo*/ }
+                )
+                ActionButton(
+                    drawableRes = R.drawable.ic_qr,
+                    text = "QR",
+                    onClick = {/*Todo*/ }
+                )
+                ActionButton(
+                    drawableRes = R.drawable.ic_read,
+                    text = "Read",
+                    onClick = {/*Todo*/ }
+                )
+            }
+
         }
     }
+}
+
+@Preview
+@Composable
+private fun CardPreview() {
+    Card(
+        digiPin = "4J6-M8K-2T22",
+        latLng = "16.68149965, 74.43999052",
+        isFavorite = false,
+        onDismiss = { /*Nothing*/}
+    )
 }

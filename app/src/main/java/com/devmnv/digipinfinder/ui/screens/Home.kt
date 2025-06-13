@@ -24,9 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
@@ -67,7 +70,8 @@ fun Home(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize(),
             onMapLoaded = { isMapLoaded = true },
-            cameraPositionState = cameraPositionState
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(mapType = MapType.SATELLITE),
         )
     }
 }
