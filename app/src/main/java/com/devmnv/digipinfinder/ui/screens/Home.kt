@@ -63,18 +63,20 @@ fun Home(modifier: Modifier = Modifier) {
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
+            Log.d("CurrentLocation", "Permission Granted")
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     val latLng = LatLng(it.latitude, it.longitude)
                     markerPosition = latLng
                     showCard = true
+                    Log.d("CurrentLocation","${it.latitude}, ${it.longitude}")
                     cameraPositionState.move(
                         CameraUpdateFactory.newLatLngZoom(latLng, 18f)
                     )
                 }
             }
         } else {
-            Log.e("HomeScreen", "Location permission was denied")
+            Log.e("CurrentLocation", "Location permission was denied")
         }
     }
 
@@ -84,19 +86,21 @@ fun Home(modifier: Modifier = Modifier) {
                 context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
+                Log.d("CurrentLocation","Permission already granted")
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {
                         val latLng = LatLng(it.latitude, it.longitude)
                         markerPosition = latLng
                         showCard = true
+                        Log.d("CurrentLocation","${it.latitude}, ${it.longitude}")
                         cameraPositionState.move(
                             CameraUpdateFactory.newLatLngZoom(latLng, 18f)
                         )
                     }
                 }
             }
-
             else -> {
+                Log.d("CurrentLocation","Permission denied")
                 permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
@@ -146,10 +150,10 @@ fun Home(modifier: Modifier = Modifier) {
         }
 
         if (showCard && markerPosition != null) {
-            Surface(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp)
+                    .padding(vertical = 10.dp)
             ) {
                 DigiCard(
                     digiPin = "DGPX2406",
