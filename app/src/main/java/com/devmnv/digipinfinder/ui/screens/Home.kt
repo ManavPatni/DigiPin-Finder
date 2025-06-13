@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.devmnv.digipinfinder.BuildConfig
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.composables.DigiCard
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
@@ -40,6 +41,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.Places
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -61,6 +63,7 @@ fun Home(modifier: Modifier = Modifier) {
     var markerPosition by remember { mutableStateOf<LatLng?>(null) }
     var showCard by remember { mutableStateOf(false) }
 
+    // Location permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
