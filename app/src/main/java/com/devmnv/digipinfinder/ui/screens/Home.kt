@@ -45,6 +45,7 @@ import com.google.android.libraries.places.api.Places
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -170,6 +171,7 @@ fun Home(modifier: Modifier = Modifier) {
                     .padding(vertical = 10.dp)
             ) {
                 DigiCard(
+                    context = context,
                     digiPin = digipin,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
                     isFavorite = false,

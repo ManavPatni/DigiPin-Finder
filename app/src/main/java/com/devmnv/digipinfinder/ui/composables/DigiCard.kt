@@ -2,6 +2,10 @@ package com.devmnv.digipinfinder.ui.composables
 
 import android.content.ClipData
 import android.content.Context
+import android.content.Intent
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.OnInitListener
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,12 +40,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun DigiCard(
+    context: Context,
     digiPin: String,
     latLng: String,
     isFavorite: Boolean,
@@ -46,6 +56,30 @@ fun DigiCard(
 ) {
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
+
+    //Share
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, digiPin)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+
+    //TTS
+    val tts = remember { mutableStateOf<TextToSpeech?>(null) }
+    val isInitialized = remember { mutableStateOf(false) }
+
+    // Initialize TTS
+    val initListener = OnInitListener { status ->
+        if (status == TextToSpeech.SUCCESS) {
+            tts.value?.language = Locale.getDefault()
+            isInitialized.value = true
+        }
+    }
+
+    if (tts.value == null) {
+        tts.value = TextToSpeech(context, initListener)
+    }
 
     Box(
         modifier = Modifier
@@ -118,33 +152,52 @@ fun DigiCard(
                 ActionButton(
                     drawableRes = R.drawable.ic_favorite,
                     text = "Favorite",
-                    onClick = {/*Todo*/ }
+                    onClick = { showToast(context, "Currently not available..") }
                 )
                 ActionButton(
                     drawableRes = R.drawable.ic_share,
                     text = "Share",
-                    onClick = {/*Todo*/ }
+                    onClick = {
+                        context.startActivity(shareIntent)
+                    }
                 )
                 ActionButton(
                     drawableRes = R.drawable.ic_qr,
                     text = "QR",
-                    onClick = {/*Todo*/ }
+                    onClick = { showToast(context, "Currently not available..") }
                 )
                 ActionButton(
                     drawableRes = R.drawable.ic_read,
                     text = "Read",
-                    onClick = {/*Todo*/ }
+                    onClick = {
+                        if (isInitialized.value) {
+                            tts.value?.speak(digiPin, TextToSpeech.QUEUE_FLUSH, null, null)
+                        }
+                    }
                 )
             }
 
         }
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            tts.value?.stop()
+            tts.value?.shutdown()
+        }
+    }
+
+}
+
+private fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 @Preview
 @Composable
 private fun CardPreview() {
     DigiCard(
+        context = LocalContext.current,
         digiPin = "4J6-M8K-2T22",
         latLng = "16.68149965, 74.43999052",
         isFavorite = false,

@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
 fun DisplayScreen(modifier: Modifier, screenIndex: Int) {
     when(screenIndex) {
         0 -> Home(modifier)
-        1 -> Find()
-        2 -> Favorites()
+        1 -> Find(modifier)
+        2 -> Favorites(modifier)
     }
 }
