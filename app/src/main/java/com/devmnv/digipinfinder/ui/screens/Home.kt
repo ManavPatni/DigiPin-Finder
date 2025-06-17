@@ -5,36 +5,26 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.devmnv.digipinfinder.BuildConfig
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.composables.DigiCard
+import com.devmnv.digipinfinder.ui.composables.PlaceSearchBar
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import com.devmnv.digipinfinder.utils.Digipin
 import com.google.android.gms.location.LocationServices
@@ -45,7 +35,6 @@ import com.google.android.libraries.places.api.Places
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -53,16 +42,20 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun Home(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+
+    // Maps
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(28.612893537623524, 77.23106223299752), 15f
         )
     }
-
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
     var markerPosition by remember { mutableStateOf<LatLng?>(null) }
     var showCard by remember { mutableStateOf(false) }
+
+    if (!Places.isInitialized()) {
+        Places.initializeWithNewPlacesApiEnabled(context, BuildConfig.MAPS_API_KEY)
+    }
 
     // Location permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -75,7 +68,7 @@ fun Home(modifier: Modifier = Modifier) {
                     val latLng = LatLng(it.latitude, it.longitude)
                     markerPosition = latLng
                     showCard = true
-                    Log.d("CurrentLocation","${it.latitude}, ${it.longitude}")
+                    Log.d("CurrentLocation", "${it.latitude}, ${it.longitude}")
                     cameraPositionState.move(
                         CameraUpdateFactory.newLatLngZoom(latLng, 18f)
                     )
@@ -92,13 +85,13 @@ fun Home(modifier: Modifier = Modifier) {
                 context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
-                Log.d("CurrentLocation","Permission already granted")
+                Log.d("CurrentLocation", "Permission already granted")
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {
                         val latLng = LatLng(it.latitude, it.longitude)
                         markerPosition = latLng
                         showCard = true
-                        Log.d("CurrentLocation","${it.latitude}, ${it.longitude}")
+                        Log.d("CurrentLocation", "${it.latitude}, ${it.longitude}")
                         cameraPositionState.move(
                             CameraUpdateFactory.newLatLngZoom(latLng, 18f)
                         )
@@ -106,17 +99,35 @@ fun Home(modifier: Modifier = Modifier) {
                 }
             }
             else -> {
-                Log.d("CurrentLocation","Permission denied")
+                Log.d("CurrentLocation", "Permission denied")
                 permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
+        GoogleMap(
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(mapType = MapType.SATELLITE),
+            onMapClick = { latLng ->
+                markerPosition = latLng
+                showCard = true
+                cameraPositionState.move(
+                    CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+                )
+            }
+        ) {
+            markerPosition?.let {
+                Marker(
+                    state = MarkerState(position = it)
+                )
+            }
+        }
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color.White)
                     .padding(horizontal = 10.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -135,24 +146,16 @@ fun Home(modifier: Modifier = Modifier) {
                 }
             }
 
-            GoogleMap(
-                modifier = Modifier.weight(1f),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(mapType = MapType.SATELLITE),
-                onMapClick = { latLng ->
-                    markerPosition = latLng
+            PlaceSearchBar(
+                onPlaceSelected = {
+                    markerPosition = it
                     showCard = true
                     cameraPositionState.move(
-                        CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+                        CameraUpdateFactory.newLatLngZoom(it, 18f)
                     )
                 }
-            ) {
-                markerPosition?.let {
-                    Marker(
-                        state = MarkerState(position = it)
-                    )
-                }
-            }
+            )
+
         }
 
         val digipin = try {
@@ -184,5 +187,3 @@ fun Home(modifier: Modifier = Modifier) {
         }
     }
 }
-
-
