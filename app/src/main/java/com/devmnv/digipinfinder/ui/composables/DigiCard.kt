@@ -3,6 +3,7 @@ package com.devmnv.digipinfinder.ui.composables
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Composable
 fun DigiCard(
@@ -146,7 +148,16 @@ fun DigiCard(
                 ActionButton(
                     drawableRes = R.drawable.ic_navigate,
                     text = "Navigate",
-                    onClick = { showToast(context, "Currently not available..") }
+                    onClick = {
+                        val (latitude, longitude) = latLng.split(",")
+                        val uri = "geo:$latLng?q=$latitude,$longitude(Digipin Location)".toUri()
+                        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                            setPackage("com.google.android.apps.maps")
+                        }
+                        intent.resolveActivity(context.packageManager)?.let {
+                            context.startActivity(intent)
+                        }
+                    }
                 )
             }
 
