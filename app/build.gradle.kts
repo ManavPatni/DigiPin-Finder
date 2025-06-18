@@ -70,4 +70,10 @@ dependencies {
     implementation(libs.maps.compose.widgets)
     implementation(libs.places)
     implementation(libs.play.services.maps)
+
+    //QR code
+    implementation(libs.qrose)
+
+    //navigation
+    implementation(libs.androidx.navigation.compose)
 }

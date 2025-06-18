@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.devmnv.digipinfinder.BuildConfig
 import com.devmnv.digipinfinder.R
@@ -40,7 +39,10 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun Home(modifier: Modifier = Modifier) {
+fun Home(
+    modifier: Modifier = Modifier,
+    onGenerateQrButtonClick: (String) -> Unit
+) {
     val context = LocalContext.current
 
     // Maps
@@ -178,6 +180,7 @@ fun Home(modifier: Modifier = Modifier) {
                     digiPin = digipin,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
                     isFavorite = false,
+                    onQrButtonClicked = { onGenerateQrButtonClick(digipin) },
                     onDismiss = {
                         markerPosition = null
                         showCard = false

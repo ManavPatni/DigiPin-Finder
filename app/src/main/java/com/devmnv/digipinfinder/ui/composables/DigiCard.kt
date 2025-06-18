@@ -3,8 +3,6 @@ package com.devmnv.digipinfinder.ui.composables
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.speech.tts.TextToSpeech
-import android.speech.tts.TextToSpeech.OnInitListener
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,28 +21,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 @Composable
 fun DigiCard(
@@ -52,6 +44,7 @@ fun DigiCard(
     digiPin: String,
     latLng: String,
     isFavorite: Boolean,
+    onQrButtonClicked: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val clipboard = LocalClipboard.current
@@ -64,22 +57,6 @@ fun DigiCard(
         type = "text/plain"
     }
     val shareIntent = Intent.createChooser(sendIntent, null)
-
-    //TTS
-    val tts = remember { mutableStateOf<TextToSpeech?>(null) }
-    val isInitialized = remember { mutableStateOf(false) }
-
-    // Initialize TTS
-    val initListener = OnInitListener { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            tts.value?.language = Locale.getDefault()
-            isInitialized.value = true
-        }
-    }
-
-    if (tts.value == null) {
-        tts.value = TextToSpeech(context, initListener)
-    }
 
     Box(
         modifier = Modifier
@@ -164,26 +141,15 @@ fun DigiCard(
                 ActionButton(
                     drawableRes = R.drawable.ic_qr,
                     text = "QR",
-                    onClick = { showToast(context, "Currently not available..") }
+                    onClick = { onQrButtonClicked() }
                 )
                 ActionButton(
-                    drawableRes = R.drawable.ic_read,
-                    text = "Read",
-                    onClick = {
-                        if (isInitialized.value) {
-                            tts.value?.speak(digiPin, TextToSpeech.QUEUE_FLUSH, null, null)
-                        }
-                    }
+                    drawableRes = R.drawable.ic_navigate,
+                    text = "Navigate",
+                    onClick = { showToast(context, "Currently not available..") }
                 )
             }
 
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            tts.value?.stop()
-            tts.value?.shutdown()
         }
     }
 
@@ -201,6 +167,7 @@ private fun CardPreview() {
         digiPin = "4J6-M8K-2T22",
         latLng = "16.68149965, 74.43999052",
         isFavorite = false,
+        onQrButtonClicked = {/*Nothing*/},
         onDismiss = { /*Nothing*/}
     )
 }
