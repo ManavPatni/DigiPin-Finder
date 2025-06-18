@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.compose.rememberNavController
 import com.devmnv.digipinfinder.navigation.MainNavGraph
 import com.devmnv.digipinfinder.ui.theme.DigiPinFinderTheme
+import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
@@ -17,21 +19,13 @@ import com.google.android.play.core.install.model.UpdateAvailability
 
 class MainActivity : ComponentActivity() {
 
-    //In-app updates
-    private val appUpdateManager = AppUpdateManagerFactory.create(this)
-
-    private val activityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult ->
-            if (result.resultCode != RESULT_OK) {
-                Log.e("In-app Update", "Update flow failed! Result code: " + result.resultCode);
-                // If the update is canceled or fails,
-                // you can request to start the update again.
-            }
-        }
+    private lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             DigiPinFinderTheme {
                 val navController = rememberNavController()
@@ -39,40 +33,53 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateManager = AppUpdateManagerFactory.create(this)
 
-        // Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-            ) {
-                appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo,
-                    activityResultLauncher,
-                    AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
-                        .build()
-                )
+        // Register the activity result launcher
+        updateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                Log.d("InAppUpdate", "Update completed successfully.")
+            } else {
+                Log.e("InAppUpdate", "Update canceled or failed. Code: ${result.resultCode}")
             }
         }
 
+        checkForUpdate()
+    }
+
+    private fun checkForUpdate() {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        updateLauncher,
+                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                    )
+                } catch (e: Exception) {
+                    Log.e("InAppUpdate", "Failed to start update: ${e.message}")
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
 
-        appUpdateManager
-            .appUpdateInfo
-            .addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability()
-                    == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
-                ) {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                try {
                     appUpdateManager.startUpdateFlowForResult(
                         appUpdateInfo,
-                        activityResultLauncher,
+                        updateLauncher,
                         AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
                     )
+                } catch (e: Exception) {
+                    Log.e("InAppUpdate", "Resume update failed: ${e.message}")
                 }
             }
+        }
     }
-
 }
