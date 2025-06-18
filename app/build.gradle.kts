@@ -76,4 +76,8 @@ dependencies {
 
     //navigation
     implementation(libs.androidx.navigation.compose)
+
+    //Google Play in-app updates
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
 }
