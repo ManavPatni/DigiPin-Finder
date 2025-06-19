@@ -4,8 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -33,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +39,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -51,6 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
@@ -59,11 +61,6 @@ import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.core.graphics.set
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
 
 @Composable
 fun DigiQR(
@@ -72,40 +69,43 @@ fun DigiQR(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val qrBitmap = remember(digipin) { generateQr(context, digipin) }
+    val qrBitmap = remember(digipin) { generateQr(digipin) }
     val graphicsLayer = rememberGraphicsLayer()
 
-    Box(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-    ) {
-        Scaffold {innerPadding ->
-            Image(
-                painter = painterResource(R.drawable.bg_qr),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+    ) { innerPadding ->
+        Image(
+            painter = painterResource(R.drawable.bg_qr),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopStart),
+                onClick = {
+                    navController.popBackStack()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    tint = Color.White,
+                    contentDescription = "Back"
+                )
+            }
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(innerPadding),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.Start),
-                    onClick = {
-                        navController.popBackStack()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        tint = Color.White,
-                        contentDescription = "Back"
-                    )
-                }
-                Spacer(modifier = Modifier.height(40.dp))
                 Card(
                     elevation = CardDefaults.elevatedCardElevation(
                         defaultElevation = 5.dp,
@@ -127,7 +127,7 @@ fun DigiQR(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
                             text = "DIGIPIN QR Code",
@@ -135,14 +135,12 @@ fun DigiQR(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
                         )
-                        Spacer(modifier = Modifier.height(30.dp))
                         Image(
-                           bitmap = qrBitmap.asImageBitmap(),
+                            bitmap = qrBitmap.asImageBitmap(),
                             contentDescription = "Digipin QR Code",
                             modifier = Modifier
                                 .size(220.dp)
                         )
-                        Spacer(modifier = Modifier.height(30.dp))
                         Text(
                             text = "DIGIPIN",
                             fontFamily = SpaceGroteskFamily,
@@ -200,7 +198,11 @@ fun DigiQR(
                         onClick = {
                             coroutineScope.launch {
                                 val bitmap: ImageBitmap = graphicsLayer.toImageBitmap()
-                                saveBitmapToGallery(context = context, bitmap = bitmap, displayName = "digipin_finder_$digipin")
+                                saveBitmapToGallery(
+                                    context = context,
+                                    bitmap = bitmap,
+                                    displayName = "digipin_finder_$digipin"
+                                )
                             }
                         }
                     ) {
@@ -219,9 +221,9 @@ fun DigiQR(
     }
 }
 
-fun generateQr(context: Context, digipin: String): Bitmap {
+fun generateQr(digipin: String): Bitmap {
     val writer = QRCodeWriter()
-    val size = 300
+    val size = 512
     val bitMatrix = writer.encode(digipin, BarcodeFormat.QR_CODE, size, size)
 
     val qrBitmap = createBitmap(size, size)
@@ -231,19 +233,6 @@ fun generateQr(context: Context, digipin: String): Bitmap {
                 if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE
         }
     }
-
-    val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_logo)
-
-    // Overlay logo
-    val canvas = Canvas(qrBitmap)
-    val scaleFactor = 5
-    val logoSize = size / scaleFactor
-
-    val left = (qrBitmap.width - logoSize) / 2f
-    val top = (qrBitmap.height - logoSize) / 2f
-
-    val scaledLogo = logo.scale(logoSize, logoSize)
-    canvas.drawBitmap(scaledLogo, left, top, null)
 
     return qrBitmap
 }
@@ -280,9 +269,13 @@ private fun saveBitmapToGallery(context: Context, bitmap: ImageBitmap, displayNa
         put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             put(MediaStore.Images.Media.IS_PENDING, 1)
-            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Digipin Finder")
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/Digipin Finder"
+            )
         } else {
-            val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Digipin Finder")
+            val directory =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/Digipin Finder")
             if (!directory.exists()) {
                 directory.mkdirs()
             }

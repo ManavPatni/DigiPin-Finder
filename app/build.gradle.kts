@@ -73,7 +73,7 @@ dependencies {
     implementation(libs.play.services.maps)
 
     //QR code
-    implementation(libs.core)
+    implementation(libs.zxing)
 
     //navigation
     implementation(libs.androidx.navigation.compose)
