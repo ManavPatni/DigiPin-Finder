@@ -15,6 +15,8 @@ navigationCompose = "2.9.0"
 places = "3.5.0" #v4.3.1 has errors
 playServicesMaps = "19.2.0"
 zxing = "3.5.3"
+mlKit = "17.3.0"
+cameraX = "1.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +43,11 @@ maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", ve
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "mapsCompose" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+barcode-scanning = {module = "com.google.mlkit:barcode-scanning", version.ref = "mlKit"}
+camera-core = {module = "androidx.camera:camera-core", version.ref = "cameraX"}
+camera-camera2 = {module = "androidx.camera:camera-camera2", version.ref = "cameraX"}
+camera-lifecycle = {module = "androidx.camera:camera-lifecycle", version.ref = "cameraX"}
+camera-view = {module = "androidx.camera:camera-view", version.ref = "cameraX"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

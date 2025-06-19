@@ -102,6 +102,7 @@ fun DigiQR(
             }
             Column(
                 modifier = Modifier
+                    .padding(top = 25.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center

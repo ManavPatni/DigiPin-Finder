@@ -74,6 +74,13 @@ dependencies {
 
     //QR code
     implementation(libs.zxing)
+    implementation(libs.barcode.scanning)
+
+    //Camera
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 
     //navigation
     implementation(libs.androidx.navigation.compose)
