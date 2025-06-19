@@ -9,11 +9,11 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2025.06.00"
+composeBom = "2025.06.01"
 mapsCompose = "4.4.1"
 navigationCompose = "2.9.0"
-places = "3.5.0"
-playServicesMaps = "19.0.0"
+places = "3.5.0" #v4.3.1 has errors
+playServicesMaps = "19.2.0"
 zxing = "3.5.3"
 
 [libraries]
