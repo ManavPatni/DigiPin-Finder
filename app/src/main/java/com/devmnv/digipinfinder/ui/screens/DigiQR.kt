@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -31,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +40,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,12 +54,16 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
-import io.github.alexzhirkevich.qrose.options.QrLogo
-import io.github.alexzhirkevich.qrose.options.QrOptions
-import io.github.alexzhirkevich.qrose.rememberQrCodePainter
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.set
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 @Composable
 fun DigiQR(
@@ -69,12 +72,7 @@ fun DigiQR(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val painterData = rememberQrCodePainter(
-        data = digipin,
-        options = QrOptions(
-            logo = QrLogo(painter = painterResource(id = R.drawable.ic_logo))
-        )
-    )
+    val qrBitmap = remember(digipin) { generateQr(context, digipin) }
     val graphicsLayer = rememberGraphicsLayer()
 
     Box(
@@ -139,7 +137,7 @@ fun DigiQR(
                         )
                         Spacer(modifier = Modifier.height(30.dp))
                         Image(
-                            painter = painterData,
+                           bitmap = qrBitmap.asImageBitmap(),
                             contentDescription = "Digipin QR Code",
                             modifier = Modifier
                                 .size(220.dp)
@@ -219,6 +217,35 @@ fun DigiQR(
             }
         }
     }
+}
+
+fun generateQr(context: Context, digipin: String): Bitmap {
+    val writer = QRCodeWriter()
+    val size = 300
+    val bitMatrix = writer.encode(digipin, BarcodeFormat.QR_CODE, size, size)
+
+    val qrBitmap = createBitmap(size, size)
+    for (x in 0 until size) {
+        for (y in 0 until size) {
+            qrBitmap[x, y] =
+                if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+        }
+    }
+
+    val logo = BitmapFactory.decodeResource(context.resources, R.drawable.ic_logo)
+
+    // Overlay logo
+    val canvas = Canvas(qrBitmap)
+    val scaleFactor = 5
+    val logoSize = size / scaleFactor
+
+    val left = (qrBitmap.width - logoSize) / 2f
+    val top = (qrBitmap.height - logoSize) / 2f
+
+    val scaledLogo = logo.scale(logoSize, logoSize)
+    canvas.drawBitmap(scaledLogo, left, top, null)
+
+    return qrBitmap
 }
 
 // Helper function to save the bitmap to cache
