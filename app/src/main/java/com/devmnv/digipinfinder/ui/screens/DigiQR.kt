@@ -29,6 +29,9 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -56,12 +59,17 @@ import androidx.core.graphics.set
 import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DigiQR(
     navController: NavHostController,
@@ -72,9 +80,13 @@ fun DigiQR(
     val qrBitmap = remember(digipin) { generateQr(digipin) }
     val graphicsLayer = rememberGraphicsLayer()
 
+    val storagePermission =
+        rememberPermissionState(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Image(
             painter = painterResource(R.drawable.bg_qr),
@@ -199,11 +211,48 @@ fun DigiQR(
                         onClick = {
                             coroutineScope.launch {
                                 val bitmap: ImageBitmap = graphicsLayer.toImageBitmap()
-                                saveBitmapToGallery(
-                                    context = context,
-                                    bitmap = bitmap,
-                                    displayName = "digipin_finder_$digipin"
-                                )
+
+                                val saveQrToGallery = {
+                                    saveBitmapToGallery(
+                                        context = context,
+                                        bitmap = bitmap,
+                                        displayName = "digipin_finder_$digipin"
+                                    )
+                                }
+
+                                when {
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                                        // No permission needed
+                                        saveQrToGallery()
+                                    }
+
+                                    storagePermission.status.isGranted -> {
+                                        // Permission granted on Android ≤ 9
+                                        saveQrToGallery()
+                                    }
+
+                                    storagePermission.status.shouldShowRationale -> {
+                                        // Ask for permission again
+                                        storagePermission.launchPermissionRequest()
+                                    }
+
+                                    else -> {
+                                        // Permanently denied → Open settings via snackbar
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "Storage permission required to save QR",
+                                            actionLabel = "Open Settings"
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            val intent = Intent(
+                                                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                Uri.fromParts("package", context.packageName, null)
+                                            ).apply {
+                                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            }
+                                            context.startActivity(intent)
+                                        }
+                                    }
+                                }
                             }
                         }
                     ) {

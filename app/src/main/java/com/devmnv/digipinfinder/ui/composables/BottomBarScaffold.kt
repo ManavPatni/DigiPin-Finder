@@ -83,16 +83,21 @@ fun BottomBarScaffold(
             startDestination = "home",
             modifier = Modifier.padding(padding)
         ) {
-            composable("home") {
+            composable("home") { backStackEntry ->
+                val digipin = backStackEntry.arguments?.getString("digipin")
                 Home(
                     modifier = Modifier,
-                    onGenerateQrButtonClick = { digipin ->
-                        mainNavController.navigate("digiqr/$digipin") // Use main controller
+                    digipin = digipin,
+                    onGenerateQrButtonClick = {
+                        mainNavController.navigate("digiqr/$it")
                     }
                 )
             }
             composable("find") {
-                Find(modifier = Modifier)
+                Find(
+                    modifier = Modifier,
+                    bottomNavController = bottomNavController
+                )
             }
             composable("favorites") {
                 Favorites(modifier = Modifier)

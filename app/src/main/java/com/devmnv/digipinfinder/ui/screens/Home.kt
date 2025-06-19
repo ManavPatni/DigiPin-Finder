@@ -41,6 +41,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun Home(
     modifier: Modifier = Modifier,
+    digipin: String? = null,
     onGenerateQrButtonClick: (String) -> Unit
 ) {
     val context = LocalContext.current
