@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.devmnv.digipinfinder.model.BottomNavigationItem
 import com.devmnv.digipinfinder.ui.screens.Favorites
 import com.devmnv.digipinfinder.ui.screens.Find
@@ -28,7 +29,7 @@ fun BottomBarScaffold(
     mainNavController: NavHostController    // For main navigation (e.g., to DigiQR)
 ) {
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoute = navBackStackEntry?.destination?.route?.substringBefore("?")
 
     val items = listOf(
         BottomNavigationItem(
@@ -83,7 +84,15 @@ fun BottomBarScaffold(
             startDestination = "home",
             modifier = Modifier.padding(padding)
         ) {
-            composable("home") { backStackEntry ->
+            composable(
+                route = "home?digipin={digipin}",
+                arguments = listOf(
+                    navArgument("digipin") {
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
                 val digipin = backStackEntry.arguments?.getString("digipin")
                 Home(
                     modifier = Modifier,

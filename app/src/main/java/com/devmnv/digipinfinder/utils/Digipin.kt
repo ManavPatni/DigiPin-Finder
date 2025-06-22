@@ -1,9 +1,7 @@
 package com.devmnv.digipinfinder.utils
 
 import com.devmnv.digipinfinder.model.Bounds
-import kotlin.math.floor
-import kotlin.math.max
-import kotlin.math.min
+import com.google.android.gms.maps.model.LatLng
 
 object Digipin {
 
@@ -58,6 +56,54 @@ object Digipin {
 
         return digiPin
 
+    }
+
+    fun getLatLngFromDigiPin(digiPin: String): LatLng {
+        val pin = digiPin.replace("-", "")
+        if (pin.length != 10) throw IllegalArgumentException("Invalid DIGIPIN")
+
+        var minLat = BOUNDS.minLat
+        var maxLat = BOUNDS.maxLat
+        var minLon = BOUNDS.minLon
+        var maxLon = BOUNDS.maxLon
+
+        for (char in pin) {
+            var found = false
+            var ri = -1
+            var ci = -1
+
+            for (r in DIGIPIN_GRID.indices) {
+                for (c in DIGIPIN_GRID[r].indices) {
+                    if (DIGIPIN_GRID[r][c] == char) {
+                        ri = r
+                        ci = c
+                        found = true
+                        break
+                    }
+                }
+                if (found) break
+            }
+
+            if (!found) throw IllegalArgumentException("Invalid character in DIGIPIN")
+
+            val latDiv = (maxLat - minLat) / 4
+            val lonDiv = (maxLon - minLon) / 4
+
+            val lat1 = maxLat - latDiv * (ri + 1)
+            val lat2 = maxLat - latDiv * ri
+            val lon1 = minLon + lonDiv * ci
+            val lon2 = minLon + lonDiv * (ci + 1)
+
+            minLat = lat1
+            maxLat = lat2
+            minLon = lon1
+            maxLon = lon2
+        }
+
+        val centerLat = (minLat + maxLat) / 2
+        val centerLon = (minLon + maxLon) / 2
+
+        return LatLng(centerLat.toDouble(), centerLon.toDouble())
     }
 
 }

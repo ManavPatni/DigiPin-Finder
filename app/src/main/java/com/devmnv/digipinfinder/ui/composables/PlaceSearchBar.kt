@@ -11,13 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.devmnv.digipinfinder.utils.LocalPlacesClient
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
@@ -30,9 +29,8 @@ fun PlaceSearchBar(
     modifier: Modifier = Modifier,
     onPlaceSelected: (LatLng) -> Unit
 ) {
-    val context = LocalContext.current
-    val placeClient = remember { Places.createClient(context) }
     val sessionToken = remember { AutocompleteSessionToken.newInstance() }
+    val placesClient = LocalPlacesClient.current
 
     var query by remember { mutableStateOf("") }
     var debouncedQuery by remember { mutableStateOf("") }
@@ -54,7 +52,7 @@ fun PlaceSearchBar(
                 .setCountries(listOf("IN"))
                 .build()
 
-            placeClient.findAutocompletePredictions(request)
+            placesClient.findAutocompletePredictions(request)
                 .addOnSuccessListener { response ->
                     predictions = response.autocompletePredictions.take(5)
                     expanded = predictions.isNotEmpty()
@@ -172,7 +170,7 @@ fun PlaceSearchBar(
                         val placeRequest = FetchPlaceRequest.builder(placeId, placeFields)
                             .setSessionToken(sessionToken)
                             .build()
-                        placeClient.fetchPlace(placeRequest)
+                        placesClient.fetchPlace(placeRequest)
                             .addOnSuccessListener { result ->
                                 result.place.latLng?.let { onPlaceSelected(it) }
                             }

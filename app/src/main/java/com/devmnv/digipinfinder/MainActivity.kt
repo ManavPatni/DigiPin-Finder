@@ -8,9 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.rememberNavController
 import com.devmnv.digipinfinder.navigation.MainNavGraph
 import com.devmnv.digipinfinder.ui.theme.DigiPinFinderTheme
+import com.devmnv.digipinfinder.utils.LocalPlacesClient
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -21,15 +25,23 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var updateLauncher: ActivityResultLauncher<IntentSenderRequest>
+    lateinit var placesClient: PlacesClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        if (!Places.isInitialized()) {
+            Places.initializeWithNewPlacesApiEnabled(this, BuildConfig.MAPS_API_KEY)
+            placesClient = Places.createClient(this)
+        }
+
         setContent {
             DigiPinFinderTheme {
-                val navController = rememberNavController()
-                MainNavGraph(navController = navController)
+                CompositionLocalProvider(LocalPlacesClient provides placesClient) {
+                    val navController = rememberNavController()
+                    MainNavGraph(navController = navController)
+                }
             }
         }
 
@@ -81,5 +93,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Places.deinitialize()
     }
 }

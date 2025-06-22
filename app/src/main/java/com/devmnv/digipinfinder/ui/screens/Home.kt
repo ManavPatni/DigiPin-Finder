@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.devmnv.digipinfinder.BuildConfig
+import com.devmnv.digipinfinder.MainActivity
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.composables.DigiCard
 import com.devmnv.digipinfinder.ui.composables.PlaceSearchBar
@@ -31,12 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
 
 @Composable
 fun Home(
@@ -55,10 +51,6 @@ fun Home(
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var markerPosition by remember { mutableStateOf<LatLng?>(null) }
     var showCard by remember { mutableStateOf(false) }
-
-    if (!Places.isInitialized()) {
-        Places.initializeWithNewPlacesApiEnabled(context, BuildConfig.MAPS_API_KEY)
-    }
 
     // Location permission launcher
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -82,28 +74,49 @@ fun Home(
         }
     }
 
+    // Handle provided DIGIPIN
+    LaunchedEffect(digipin) {
+        if (digipin != null) {
+            try {
+                val latLng = Digipin.getLatLngFromDigiPin(digipin)
+                markerPosition = latLng
+                showCard = true
+                cameraPositionState.move(
+                    CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+                )
+            } catch (e: Exception) {
+                Toast.makeText(context, "Invalid DIGIPIN", Toast.LENGTH_SHORT).show()
+                markerPosition = null
+                showCard = false
+            }
+        }
+    }
+
+    // Initial setup: get current location only if digipin is null
     LaunchedEffect(Unit) {
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
+        if (digipin == null) {
+            when (ContextCompat.checkSelfPermission(
                 context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                Log.d("CurrentLocation", "Permission already granted")
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        val latLng = LatLng(it.latitude, it.longitude)
-                        markerPosition = latLng
-                        showCard = true
-                        Log.d("CurrentLocation", "${it.latitude}, ${it.longitude}")
-                        cameraPositionState.move(
-                            CameraUpdateFactory.newLatLngZoom(latLng, 18f)
-                        )
+            )) {
+                PackageManager.PERMISSION_GRANTED -> {
+                    Log.d("CurrentLocation", "Permission already granted")
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let {
+                            val latLng = LatLng(it.latitude, it.longitude)
+                            markerPosition = latLng
+                            showCard = true
+                            Log.d("CurrentLocation", "${it.latitude}, ${it.longitude}")
+                            cameraPositionState.move(
+                                CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+                            )
+                        }
                     }
                 }
-            }
-            else -> {
-                Log.d("CurrentLocation", "Permission denied")
-                permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                else -> {
+                    Log.d("CurrentLocation", "Permission denied")
+                    permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                }
             }
         }
     }
@@ -158,10 +171,9 @@ fun Home(
                     )
                 }
             )
-
         }
 
-        val digipin = try {
+        val calculatedDigipin = try {
             markerPosition?.let { pos ->
                 Digipin.getDigiPin(lat = pos.latitude, lon = pos.longitude)
             }
@@ -170,7 +182,7 @@ fun Home(
             null
         }
 
-        if (showCard && markerPosition != null && digipin != null) {
+        if (showCard && markerPosition != null && calculatedDigipin != null) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -178,10 +190,10 @@ fun Home(
             ) {
                 DigiCard(
                     context = context,
-                    digiPin = digipin,
+                    digiPin = calculatedDigipin,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
                     isFavorite = false,
-                    onQrButtonClicked = { onGenerateQrButtonClick(digipin) },
+                    onQrButtonClicked = { onGenerateQrButtonClick(calculatedDigipin) },
                     onDismiss = {
                         markerPosition = null
                         showCard = false

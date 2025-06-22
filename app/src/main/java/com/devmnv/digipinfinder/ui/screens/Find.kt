@@ -34,6 +34,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.QRCodeAnalyzer
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
+import com.devmnv.digipinfinder.utils.DigipinValidationResult
+import com.devmnv.digipinfinder.utils.DigipinValidator
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -161,14 +163,11 @@ private fun CameraPreview(
                                     }
 
                                     Log.d("QRData", qrData)
-                                    if (isValidDigipin(qrData)) {
-                                        onDigiQrScanned(qrData)
-                                    } else {
-                                        Toast.makeText(
-                                            ctx,
-                                            "Invalid QR. No Digipin found",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                    when (val result = DigipinValidator.validate(qrData)) {
+                                        is DigipinValidationResult.Valid -> onDigiQrScanned(result.digipin)
+                                        is DigipinValidationResult.Invalid -> {
+                                            Toast.makeText(ctx, "Invalid QR. No valid Digipin found", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
                             )
@@ -189,9 +188,4 @@ private fun CameraPreview(
             modifier = Modifier.fillMaxSize()
         )
     }
-}
-
-private fun isValidDigipin(input: String): Boolean {
-    val regex = Regex("""^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}-[A-Za-z0-9]{4}$""")
-    return regex.matches(input)
 }
