@@ -1,4 +1,4 @@
-package com.devmnv.digipinfinder.ui.composables
+package com.devmnv.digipinfinder.ui.screens
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,12 +19,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.devmnv.digipinfinder.model.BottomNavigationItem
-import com.devmnv.digipinfinder.ui.screens.Favorites
-import com.devmnv.digipinfinder.ui.screens.Find
-import com.devmnv.digipinfinder.ui.screens.Home
 
 @Composable
-fun BottomBarScaffold(
+fun Main(
     bottomNavController: NavHostController, // For bottom navigation
     mainNavController: NavHostController    // For main navigation (e.g., to DigiQR)
 ) {
@@ -97,9 +94,7 @@ fun BottomBarScaffold(
                 Home(
                     modifier = Modifier,
                     digipin = digipin,
-                    onGenerateQrButtonClick = {
-                        mainNavController.navigate("digiqr/$it")
-                    }
+                    mainNavController = mainNavController
                 )
             }
             composable("find") {

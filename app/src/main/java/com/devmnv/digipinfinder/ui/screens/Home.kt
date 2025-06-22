@@ -6,11 +6,24 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,8 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.devmnv.digipinfinder.BuildConfig
-import com.devmnv.digipinfinder.MainActivity
+import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.composables.DigiCard
 import com.devmnv.digipinfinder.ui.composables.PlaceSearchBar
@@ -31,14 +43,18 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
-import com.google.maps.android.compose.*
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun Home(
     modifier: Modifier = Modifier,
     digipin: String? = null,
-    onGenerateQrButtonClick: (String) -> Unit
+    mainNavController: NavHostController
 ) {
     val context = LocalContext.current
 
@@ -113,6 +129,7 @@ fun Home(
                         }
                     }
                 }
+
                 else -> {
                     Log.d("CurrentLocation", "Permission denied")
                     permissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -154,10 +171,14 @@ fun Home(
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp,
                 )
-                IconButton(onClick = { /* Settings */ }) {
+                IconButton(
+                    onClick = {
+                        mainNavController.navigate("info")
+                    }
+                ) {
                     Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Settings"
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "Info"
                     )
                 }
             }
@@ -178,7 +199,8 @@ fun Home(
                 Digipin.getDigiPin(lat = pos.latitude, lon = pos.longitude)
             }
         } catch (e: IllegalArgumentException) {
-            Toast.makeText(context, "DIGIPIN not available for this location", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "DIGIPIN not available for this location", Toast.LENGTH_SHORT)
+                .show()
             null
         }
 
@@ -193,7 +215,7 @@ fun Home(
                     digiPin = calculatedDigipin,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
                     isFavorite = false,
-                    onQrButtonClicked = { onGenerateQrButtonClick(calculatedDigipin) },
+                    onQrButtonClicked = { mainNavController.navigate("digiqr/$calculatedDigipin") },
                     onDismiss = {
                         markerPosition = null
                         showCard = false

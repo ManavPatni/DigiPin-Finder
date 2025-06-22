@@ -7,8 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.devmnv.digipinfinder.ui.composables.BottomBarScaffold
+import com.devmnv.digipinfinder.ui.screens.Main
 import com.devmnv.digipinfinder.ui.screens.DigiQR
+import com.devmnv.digipinfinder.ui.screens.Info
 
 @Composable
 fun MainNavGraph(navController: NavHostController) {
@@ -18,7 +19,7 @@ fun MainNavGraph(navController: NavHostController) {
     ) {
         composable("bottom_bar") {
             val bottomNavController = rememberNavController() // Separate controller for bottom nav
-            BottomBarScaffold(
+            Main(
                 bottomNavController = bottomNavController, // For bottom bar screens
                 mainNavController = navController          // For main app navigation
             )
@@ -31,6 +32,11 @@ fun MainNavGraph(navController: NavHostController) {
             DigiQR(
                 navController = navController,
                 digipin = digipin
+            )
+        }
+        composable("info") {
+            Info(
+                navController = navController
             )
         }
     }
