@@ -11,20 +11,28 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.devmnv.digipinfinder.database.AppDatabase
 import com.devmnv.digipinfinder.model.BottomNavigationItem
+import com.devmnv.digipinfinder.repository.FavoritesRepository
+import com.devmnv.digipinfinder.viewmodel.FavoritesViewModel
+import com.devmnv.digipinfinder.viewmodel.FavoritesViewModelFactory
 
 @Composable
 fun Main(
     bottomNavController: NavHostController, // For bottom navigation
     mainNavController: NavHostController    // For main navigation (e.g., to DigiQR)
 ) {
+    val context = LocalContext.current
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route?.substringBefore("?")
 
@@ -44,6 +52,14 @@ fun Main(
             selectedIcon = Icons.Filled.Favorite,
             unselectedIcon = Icons.Outlined.FavoriteBorder
         )
+    )
+
+    //Database
+    val db = remember { AppDatabase.getDatabase(context) }
+    val dao = db.favoritesDao()
+    val repository = remember { FavoritesRepository(dao) }
+    val viewModel: FavoritesViewModel = viewModel(
+        factory = FavoritesViewModelFactory(repository)
     )
 
     Scaffold(
@@ -94,6 +110,7 @@ fun Main(
                 Home(
                     modifier = Modifier,
                     digipin = digipin,
+                    viewModel = viewModel,
                     mainNavController = mainNavController
                 )
             }
@@ -104,7 +121,11 @@ fun Main(
                 )
             }
             composable("favorites") {
-                Favorites(modifier = Modifier)
+                Favorites(
+                    modifier = Modifier,
+                    viewModel = viewModel,
+                    bottomNavController = bottomNavController
+                )
             }
         }
     }

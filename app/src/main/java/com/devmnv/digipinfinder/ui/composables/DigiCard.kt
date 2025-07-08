@@ -3,8 +3,6 @@ package com.devmnv.digipinfinder.ui.composables
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,36 +19,43 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.devmnv.digipinfinder.R
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import com.devmnv.digipinfinder.database.Favorites
+import com.devmnv.digipinfinder.viewmodel.FavoritesViewModel
 
 @Composable
 fun DigiCard(
     context: Context,
     digiPin: String,
     latLng: String,
-    isFavorite: Boolean,
+    viewModel: FavoritesViewModel,
     onQrButtonClicked: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
+    var isFavorite by rememberSaveable { mutableStateOf(false) }
+    var showSaveDialog by rememberSaveable { mutableStateOf(false) }
 
     //Share
     val sendIntent = Intent().apply {
@@ -59,6 +64,10 @@ fun DigiCard(
         type = "text/plain"
     }
     val shareIntent = Intent.createChooser(sendIntent, null)
+
+    LaunchedEffect(Unit) {
+        isFavorite = viewModel.isFavorite(digiPin)
+    }
 
     Box(
         modifier = Modifier
@@ -129,9 +138,16 @@ fun DigiCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ActionButton(
-                    drawableRes = R.drawable.ic_favorite,
+                    drawableRes = if(isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite,
                     text = "Favorite",
-                    onClick = { showToast(context, "Currently not available..") }
+                    onClick = {
+                        if (isFavorite) {
+                            viewModel.deleteFavorite(digiPin)
+                            isFavorite = false
+                        } else {
+                            showSaveDialog = true
+                        }
+                    }
                 )
                 ActionButton(
                     drawableRes = R.drawable.ic_share,
@@ -164,21 +180,83 @@ fun DigiCard(
         }
     }
 
+    if (showSaveDialog) {
+        SaveToFavorites(
+            digiPin = digiPin,
+            viewModel = viewModel,
+            onDismiss = { showSaveDialog = false },
+            onSaved = {
+                isFavorite = true
+                showSaveDialog = false
+            }
+        )
+    }
+
+
 }
 
-private fun showToast(context: Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-}
-
-@Preview
 @Composable
-private fun CardPreview() {
-    DigiCard(
-        context = LocalContext.current,
-        digiPin = "4J6-M8K-2T22",
-        latLng = "16.68149965, 74.43999052",
-        isFavorite = false,
-        onQrButtonClicked = {/*Nothing*/},
-        onDismiss = { /*Nothing*/}
-    )
+private fun SaveToFavorites(
+    digiPin: String,
+    viewModel: FavoritesViewModel,
+    onDismiss: () -> Unit,
+    onSaved: () -> Unit
+) {
+    var placeName by rememberSaveable { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .background(Color.White, shape = RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Save Location",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    fontFamily = SpaceGroteskFamily
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Enter a name for this DigiPin (e.g., Home, Office):",
+                    fontSize = 14.sp,
+                    fontFamily = SpaceGroteskFamily
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                androidx.compose.material3.OutlinedTextField(
+                    value = placeName,
+                    onValueChange = { placeName = it },
+                    label = { Text("Place Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    androidx.compose.material3.TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            if (placeName.isNotBlank()) {
+                                val fav = Favorites(
+                                    name = placeName.trim(),
+                                    digipin = digiPin
+                                )
+                                viewModel.addFavorite(fav)
+                                onSaved()
+                            }
+                        }
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
+    }
 }
+

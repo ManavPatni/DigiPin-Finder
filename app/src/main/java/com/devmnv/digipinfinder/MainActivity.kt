@@ -36,11 +36,18 @@ class MainActivity : ComponentActivity() {
             placesClient = Places.createClient(this)
         }
 
+
         setContent {
-            DigiPinFinderTheme {
+            //Nav controllers
+            val mainNavController = rememberNavController()
+            val bottomNavController = rememberNavController()
+
+            DigiPinFinderTheme (darkTheme = false) {
                 CompositionLocalProvider(LocalPlacesClient provides placesClient) {
-                    val navController = rememberNavController()
-                    MainNavGraph(navController = navController)
+                    MainNavGraph(
+                        mainNavController = mainNavController,
+                        bottomNavController = bottomNavController
+                    )
                 }
             }
         }

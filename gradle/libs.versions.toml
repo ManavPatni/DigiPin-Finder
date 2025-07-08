@@ -15,6 +15,7 @@ mapsCompose = "4.4.1"
 navigationCompose = "2.9.0"
 places = "3.5.0" #v4.3.1 has errors
 playServicesMaps = "19.2.0"
+roomCompiler = "2.7.2"
 zxing = "3.5.3"
 mlKit = "17.3.0"
 cameraX = "1.4.2"
@@ -24,6 +25,9 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-runtime = {module = "androidx.room:room-runtime", version.ref = "roomCompiler"}
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = {module = "androidx.room:room-ktx", version.ref = "roomCompiler"}
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 zxing = { module = "com.google.zxing:core", version.ref = "zxing" }

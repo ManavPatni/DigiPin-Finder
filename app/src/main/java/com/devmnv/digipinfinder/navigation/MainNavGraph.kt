@@ -12,16 +12,18 @@ import com.devmnv.digipinfinder.ui.screens.DigiQR
 import com.devmnv.digipinfinder.ui.screens.Info
 
 @Composable
-fun MainNavGraph(navController: NavHostController) {
+fun MainNavGraph(
+    mainNavController: NavHostController,
+    bottomNavController: NavHostController
+) {
     NavHost(
-        navController = navController,
+        navController = mainNavController,
         startDestination = "bottom_bar"
     ) {
         composable("bottom_bar") {
-            val bottomNavController = rememberNavController() // Separate controller for bottom nav
             Main(
                 bottomNavController = bottomNavController, // For bottom bar screens
-                mainNavController = navController          // For main app navigation
+                mainNavController = mainNavController          // For main app navigation
             )
         }
         composable(
@@ -30,13 +32,13 @@ fun MainNavGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val digipin = backStackEntry.arguments?.getString("digipin") ?: ""
             DigiQR(
-                navController = navController,
+                navController = mainNavController,
                 digipin = digipin
             )
         }
         composable("info") {
             Info(
-                navController = navController
+                navController = mainNavController
             )
         }
     }

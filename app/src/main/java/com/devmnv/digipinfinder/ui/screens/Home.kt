@@ -23,6 +23,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,10 +37,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.devmnv.digipinfinder.R
+import com.devmnv.digipinfinder.database.AppDatabase
 import com.devmnv.digipinfinder.ui.composables.DigiCard
 import com.devmnv.digipinfinder.ui.composables.PlaceSearchBar
 import com.devmnv.digipinfinder.ui.theme.SpaceGroteskFamily
 import com.devmnv.digipinfinder.utils.Digipin
+import com.devmnv.digipinfinder.viewmodel.FavoritesViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -49,11 +53,13 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 
 @Composable
 fun Home(
     modifier: Modifier = Modifier,
     digipin: String? = null,
+    viewModel: FavoritesViewModel,
     mainNavController: NavHostController
 ) {
     val context = LocalContext.current
@@ -194,6 +200,7 @@ fun Home(
             )
         }
 
+
         val calculatedDigipin = try {
             markerPosition?.let { pos ->
                 Digipin.getDigiPin(lat = pos.latitude, lon = pos.longitude)
@@ -213,8 +220,8 @@ fun Home(
                 DigiCard(
                     context = context,
                     digiPin = calculatedDigipin,
+                    viewModel = viewModel,
                     latLng = "${markerPosition!!.latitude}, ${markerPosition!!.longitude}",
-                    isFavorite = false,
                     onQrButtonClicked = { mainNavController.navigate("digiqr/$calculatedDigipin") },
                     onDismiss = {
                         markerPosition = null

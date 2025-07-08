@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1"
+    id("com.google.devtools.ksp")
 }
 
 secrets {
@@ -89,4 +90,9 @@ dependencies {
     //Google Play in-app updates
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
+
+    //room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 }
