@@ -1,4 +1,4 @@
-package com.devmnv.digipinscanner
+package com.devmnv.digipinfinder
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.devmnv.digipinscanner.ui.theme
+package com.devmnv.digipinfinder.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
