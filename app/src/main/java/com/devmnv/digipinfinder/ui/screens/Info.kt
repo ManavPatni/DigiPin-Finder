@@ -82,15 +82,15 @@ fun Info(
             Spacer(modifier = Modifier.height(24.dp))
 
             InfoCard(
-                title = "About Digipin Finder",
-                body = "Digipin Finder is a lightweight Android app that lets you instantly fetch your location-based DigiPin code – a digital address based on GPS, useful for navigation, deliveries & more."
+                title = "About Digi Address",
+                body = "Digi Address is a lightweight Android app that lets you instantly fetch your location-based DigiPin code – a digital address based on GPS, useful for navigation, deliveries & more."
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             InfoCard(
                 title = "❗ Important Disclaimer ❗",
-                body = "Digipin Finder is an independent tool and is NOT affiliated with, authorized, or endorsed by any government entity, including the Government of India, India Post, NRSC, or ISRO. This app uses public information from an open-source initiative developed by India Post, NRSC-ISRO, and IIT Hyderabad. The official source can be found here: github.com/CEPT-VZG/digipin. We do not offer official government services – this app is for general information purposes only."
+                body = "Digi Address is an independent tool and is NOT affiliated with, authorized, or endorsed by any government entity, including the Government of India, India Post, NRSC, or ISRO. This app uses public information from an open-source initiative developed by India Post, NRSC-ISRO, and IIT Hyderabad. The official source can be found here: github.com/CEPT-VZG/digipin. We do not offer official government services – this app is for general information purposes only."
             )
 
             Spacer(modifier = Modifier.height(32.dp))

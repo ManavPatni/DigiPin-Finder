@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Digipin Finder</string>
+    <string name="app_name">Digi Address</string>
     <string name="marked_digipin">Marked DIGIPIN</string>
-    <string name="scan_message">Scan the QR code in Digipin Finder app to instantly get the DIGIPIN location</string>
-    <string name="generated_by">Generate By - Digipin Finder</string>
+    <string name="scan_message">Scan the QR code in Digi Address app to instantly get the DIGIPIN location</string>
+    <string name="generated_by">Generate By - Digi Address</string>
 </resources>
