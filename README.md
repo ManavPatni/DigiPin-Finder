@@ -1,56 +1,64 @@
-<p align="center">
-  <img src="app/src/main/res/drawable/ic_logo.png" alt="DigiPin Finder Logo" width="200"/>
-</p>
+# 🚀 DigiPin-Finder
 
-<h1 align="center">DigiPin Finder</h1>
+<p align="center"><img src="./app/src/main/res/drawable/ic_logo.png" alt="DigiPin-Finder Logo" width="200"></p>
 
-<p align="center">
-  <a href="https://github.com/ManavPatni/DigiPin-Finder/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ManavPatni/DigiPin-Finder" alt="License"></a>
-  <a href="https://android-arsenal.com/details/3/8665"><img src="https://img.shields.io/badge/Android%20Arsenal-DigiPin%20Finder-brightgreen.svg?style=flat" alt="Android Arsenal"></a>
-  <img src="https://img.shields.io/badge/API-24%2B-blue.svg?style=flat" alt="API">
-  <img src="https://img.shields.io/badge/Kotlin-1.9.0-blueviolet.svg?style=flat" alt="Kotlin">
-  <img src="https://img.shields.io/badge/Compose-1.5.4-yellow.svg?style=flat" alt="Compose">
-</p>
+## Short Description
+DigiPin-Finder is an innovative Android application designed to streamline how you discover, manage, and interact with "DigiPins"—digital markers often encoded in QR codes or associated with specific locations. Scan, find, save, and navigate your essential digital waypoints with unparalleled ease.
 
-A Jetpack Compose app for finding DigiPins, a digital addressing system by the Department of Post, India. The app uses Google Maps and Places API for effortless searching of places in India.
+## ✨ Key Features
+*   **📸 QR Code Scanning:** Instantly capture and interpret DigiPins from any QR code, transforming physical data into actionable digital information.
+*   **📍 Pin Discovery & Search:** Effortlessly find and explore DigiPins based on their unique identifiers or location data, ensuring you're always connected to the right information.
+*   **❤️ Favorites Management:** Save and organize your most important DigiPins in a personalized collection for quick and easy access anytime, anywhere.
+*   **🗺️ Integrated Navigation:** Seamlessly transition from a discovered DigiPin to navigation, guiding you directly to your desired location.
+*   **Intuitive & Modern UI:** Crafted with Jetpack Compose for a beautiful, responsive, and delightful user experience on Android.
+*   **🔒 Local Persistence:** Your favorited DigiPins are securely stored locally using Room Database, ensuring your data is always available offline.
 
-## Features
+## Who is this for?
+DigiPin-Finder is for anyone who frequently interacts with QR codes or digital location markers and seeks a smarter way to manage them.
+*   **Event Attendees:** Quickly scan and save session details, speaker info, or booth locations.
+*   **Travelers & Explorers:** Discover and bookmark points of interest, hidden gems, or essential travel information.
+*   **Logistics & Field Workers:** Manage and navigate to specific digital assets or work sites.
+*   **Everyday Users:** Keep track of digital coupons, product information, or contact details shared via QR codes.
 
-*   **Find DigiPin:** Get the DigiPin for any location in India.
-*   **Search Places:** Easily search for locations using Google Places API.
-*   **Favorites:** Save your favorite DigiPins for quick access.
-*   **QR Code Scanner:** Scan DigiPin QR codes to get location details.
-*   **Share and Navigate:** Share DigiPins and get directions to the location.
+## Technology Stack & Architecture
+*   **Platform:** Android Native
+*   **Language:** Kotlin
+*   **UI Framework:** Jetpack Compose (Modern Android UI Toolkit)
+*   **Database:** Room Persistence Library
+*   **Build System:** Gradle (Kotlin DSL)
+*   **Architecture:** Follows modern Android best practices, leveraging MVVM principles for clear separation of concerns.
 
-## Screenshots
+## 📊 Architecture & Database Schema
 
-| Home Screen                                     | Find DigiPin                                      |
-| ----------------------------------------------- | ------------------------------------------------- |
-| <img src="screenshots/home.png" width="250"/>   | <img src="screenshots/find.png" width="250"/>     |
-| **Favorites**                                   | **QR Scanner**                                    |
-| <img src="screenshots/favorites.png" width="250"/> | <img src="screenshots/qr.png" width="250"/>       |
+The application employs a clean architecture with a focus on data persistence for user favorites. The core data model, `Favorites`, is managed efficiently via Room Persistence Library.
 
-## Getting Started
+```mermaid
+erDiagram
+    Favorites {
+        int id PK
+        string name
+        string digiPinValue
+        float latitude
+        float longitude
+        datetime addedDate
+    }
+```
 
-1.  **Clone the repository:**
+## ⚡ Quick Start Guide
+
+To get DigiPin-Finder up and running on your local machine:
+
+1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/ManavPatni/DigiPin-Finder.git
+    cd DigiPin-Finder
     ```
 2.  **Open in Android Studio:**
-    Open the cloned repository in Android Studio.
-3.  **Add Google Maps API Key:**
-    Get a Google Maps API key from the [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/overview).
-    Add your API key to the `local.properties` file:
-    ```
-    MAPS_API_KEY=YOUR_API_KEY
-    ```
-4.  **Build and Run:**
-    Build and run the app on an Android emulator or a physical device.
+    Launch Android Studio and open the cloned project.
+3.  **Sync Gradle:**
+    Allow Android Studio to sync the project with its Gradle files. This will download all necessary dependencies.
+4.  **Run the Application:**
+    Select the `app` module and run it on your preferred Android emulator or a physical device.
 
-## License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-Manav Patni - [@manavpatni](https://www.linkedin.com/in/manavpatni/)
+## 📜 License
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
